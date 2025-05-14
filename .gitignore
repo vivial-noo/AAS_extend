@@ -1,4 +1,6 @@
 *.zip
-.venv
+*.venv
 .env
 submodel-templates-main.zip
+*.DS_Store
+*.xlsx
