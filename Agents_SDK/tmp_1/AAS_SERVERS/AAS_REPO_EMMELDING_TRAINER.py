@@ -24,11 +24,29 @@ def find_template_json(folder: Path) -> tuple[str, str] | None:
         return None
 
     json_file = json_files[0]
-    # 提取如 'IDTA 02034-1-0' 的完整前缀
-    match = re.match(r"(IDTA\s?\d{5}-\d+-\d+)", json_file.name)
-    file_id = match.group(1).replace(" ", "") if match else "UNKNOWN"
-
+    match = re.search(r"(IDTA[\s_\-0-9]+)[\s_\-]*T", json_file.name)
+    if match:
+        file_id = match.group(1).strip().replace(" ", "_").rstrip("_").rstrip("_")
+    else:
+        file_id = "UNKNOWN"
+    
     return file_id, json_file.name
+    # 宽松正则匹配 IDTA + 5位数字 + -x-x
+    # patterns = [
+    #     r"IDTA[\s_]*(\d{4,5})[-_](\d)[-_](\d)",   # 通配 4 或 5 位数字 + 版本号（推荐）
+    #     r"IDTA[\s_]*(\d{5})",                    # 只有 IDTA + 5 位
+    #     r"IDTA[\s_]*(\d{4})",                    # 只有 IDTA + 4 位（不带版本号）
+    # ]
+    # for pattern in patterns:
+    #     match = re.search(pattern, json_file.name)
+    #     # match = re.search(r"IDTA[_\s\-]?(\d{5})[-_]?(\d)[-_]?(\d)", json_file.name)
+    #     if match:
+    #         if len(match.groups()) == 3:
+    #             file_id = f"IDTA_{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    #         else:
+    #             file_id = f"IDTA_{match.group(1)}"
+    #     else:
+    #         file_id = "UNKNOWN"
 
 def build_index(published_dir: Path) -> list[dict]:
     """从 published 文件夹构建模板索引 JSON"""
